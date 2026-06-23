@@ -4,54 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Allergy Research Portal</title>
+  <link rel="icon" type="image/png" href="icon.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
+  <div class="topbar"></div>
+
   <header>
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-icon">⬡</span>
+        <img src="icon.png" class="logo-mark" alt="Allergy Research Portal" />
         <div>
           <h1>Allergy Research Portal</h1>
-          <p>Search papers, reports, slides &amp; raw datasets</p>
+          <p>Papers &middot; Reports &middot; Slides &middot; Raw Datasets</p>
         </div>
       </div>
-      <div class="stats" id="stats">Loading...</div>
+      <div class="header-meta">
+        <div class="stats-chip" id="stats">Loading&hellip;</div>
+        <div class="header-date" id="header-date"></div>
+      </div>
     </div>
   </header>
 
   <main>
     <section class="search-panel">
+      <div class="search-panel-title">Search &amp; Filter</div>
+
       <div class="search-row">
         <input
-          type="text"
+          type="search"
           id="keyword-input"
           class="search-input"
-          placeholder="Search by keyword, title, author, or abstract…"
+          placeholder="Search by title, keyword, author, abstract, or tag&hellip;"
           autocomplete="off"
+          spellcheck="false"
         />
-        <button id="clear-btn" class="btn-ghost" title="Clear all filters">Clear</button>
+        <button class="btn-outline" id="clear-btn">Reset</button>
       </div>
 
-      <div class="filter-row">
+      <div class="filter-bar">
         <div class="filter-group">
-          <label for="id-input">ID</label>
-          <input type="text" id="id-input" placeholder="e.g. AR-004" />
+          <label for="id-input">Record ID</label>
+          <input type="text" id="id-input" placeholder="e.g. AR-012" style="width:120px" />
         </div>
-
         <div class="filter-group">
-          <label for="date-from">From</label>
-          <input type="date" id="date-from" />
-        </div>
-
-        <div class="filter-group">
-          <label for="date-to">To</label>
-          <input type="date" id="date-to" />
-        </div>
-
-        <div class="filter-group">
-          <label for="type-filter">Type</label>
+          <label for="type-filter">Document Type</label>
           <select id="type-filter">
             <option value="">All types</option>
             <option value="paper">Paper</option>
@@ -60,38 +58,48 @@
             <option value="raw_data">Raw Data</option>
           </select>
         </div>
-
         <div class="filter-group">
-          <label for="sort-by">Sort by</label>
+          <label for="date-from">Date From</label>
+          <input type="date" id="date-from" />
+        </div>
+        <div class="filter-group">
+          <label for="date-to">Date To</label>
+          <input type="date" id="date-to" />
+        </div>
+        <div class="filter-group">
+          <label for="sort-by">Sort By</label>
           <select id="sort-by">
-            <option value="date-desc">Newest first</option>
-            <option value="date-asc">Oldest first</option>
-            <option value="id-asc">ID (A→Z)</option>
-            <option value="title-asc">Title (A→Z)</option>
+            <option value="date-desc">Date (newest)</option>
+            <option value="date-asc">Date (oldest)</option>
+            <option value="id-asc">ID ascending</option>
+            <option value="title-asc">Title A&ndash;Z</option>
           </select>
         </div>
       </div>
     </section>
 
-    <section class="results-section">
-      <div class="results-meta" id="results-meta"></div>
-      <div id="results-grid" class="results-grid"></div>
-      <div id="no-results" class="no-results hidden">
-        <span>No results match your search.</span>
-        <button class="btn-ghost" onclick="clearAll()">Reset filters</button>
-      </div>
-    </section>
+    <div class="results-bar">
+      <div class="results-count" id="results-count">&nbsp;</div>
+    </div>
+
+    <div id="results-grid" class="results-grid"></div>
+
+    <div id="no-results" class="no-results hidden">
+      <p>No records match the current filters.</p>
+      <button class="btn-outline" onclick="clearAll()">Clear filters</button>
+    </div>
   </main>
 
   <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()" title="Close">&#x2715;</button>
       <div id="modal-body"></div>
     </div>
   </div>
 
   <footer>
-    <p>Allergy Research Portal — Internal Use Only</p>
+    <span>Allergy Research Portal</span>
+    <span>Internal Use Only &mdash; Confidential</span>
   </footer>
 
   <script src="app.js"></script>
