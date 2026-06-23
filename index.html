@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Allergy Research Portal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <div>
+          <h1>Allergy Research Portal</h1>
+          <p>Search papers, reports, slides &amp; raw datasets</p>
+        </div>
+      </div>
+      <div class="stats" id="stats">Loading...</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="search-panel">
+      <div class="search-row">
+        <input
+          type="text"
+          id="keyword-input"
+          class="search-input"
+          placeholder="Search by keyword, title, author, or abstract…"
+          autocomplete="off"
+        />
+        <button id="clear-btn" class="btn-ghost" title="Clear all filters">Clear</button>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="id-input">ID</label>
+          <input type="text" id="id-input" placeholder="e.g. AR-004" />
+        </div>
+
+        <div class="filter-group">
+          <label for="date-from">From</label>
+          <input type="date" id="date-from" />
+        </div>
+
+        <div class="filter-group">
+          <label for="date-to">To</label>
+          <input type="date" id="date-to" />
+        </div>
+
+        <div class="filter-group">
+          <label for="type-filter">Type</label>
+          <select id="type-filter">
+            <option value="">All types</option>
+            <option value="paper">Paper</option>
+            <option value="report">Report</option>
+            <option value="slides">Slides</option>
+            <option value="raw_data">Raw Data</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="sort-by">Sort by</label>
+          <select id="sort-by">
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="id-asc">ID (A→Z)</option>
+            <option value="title-asc">Title (A→Z)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-section">
+      <div class="results-meta" id="results-meta"></div>
+      <div id="results-grid" class="results-grid"></div>
+      <div id="no-results" class="no-results hidden">
+        <span>No results match your search.</span>
+        <button class="btn-ghost" onclick="clearAll()">Reset filters</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Allergy Research Portal — Internal Use Only</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

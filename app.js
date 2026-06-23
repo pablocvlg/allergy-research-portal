@@ -1,0 +1,226 @@
+let allRecords = [];
+let filtered   = [];
+
+const TYPE_LABELS = {
+  paper:    'Paper',
+  report:   'Report',
+  slides:   'Slides',
+  raw_data: 'Raw Data',
+};
+
+const FILE_ICONS = {
+  paper:    '📄',
+  report:   '📋',
+  slides:   '📊',
+  raw_data: '🗄️',
+};
+
+// ── Bootstrap ────────────────────────────────────────────────────────────────
+fetch('data/research.json')
+  .then(r => r.json())
+  .then(data => {
+    allRecords = data;
+    renderStats();
+    applyFilters();
+    bindEvents();
+  })
+  .catch(() => {
+    document.getElementById('results-grid').innerHTML =
+      '<p style="color:red;padding:20px">Failed to load data/research.json. ' +
+      'Open via a local server (e.g. <code>npx serve .</code>).</p>';
+  });
+
+// ── Events ───────────────────────────────────────────────────────────────────
+function bindEvents() {
+  document.getElementById('keyword-input').addEventListener('input', debounce(applyFilters, 220));
+  document.getElementById('id-input').addEventListener('input', debounce(applyFilters, 220));
+  document.getElementById('date-from').addEventListener('change', applyFilters);
+  document.getElementById('date-to').addEventListener('change', applyFilters);
+  document.getElementById('type-filter').addEventListener('change', applyFilters);
+  document.getElementById('sort-by').addEventListener('change', applyFilters);
+  document.getElementById('clear-btn').addEventListener('click', clearAll);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+}
+
+// ── Filter & Sort ─────────────────────────────────────────────────────────────
+function applyFilters() {
+  const kw      = document.getElementById('keyword-input').value.trim().toLowerCase();
+  const idQ     = document.getElementById('id-input').value.trim().toUpperCase();
+  const dateFrom= document.getElementById('date-from').value;
+  const dateTo  = document.getElementById('date-to').value;
+  const typeQ   = document.getElementById('type-filter').value;
+  const sortKey = document.getElementById('sort-by').value;
+
+  filtered = allRecords.filter(r => {
+    if (idQ && !r.id.includes(idQ)) return false;
+    if (typeQ && r.type !== typeQ) return false;
+    if (dateFrom && r.date < dateFrom) return false;
+    if (dateTo   && r.date > dateTo)   return false;
+    if (kw) {
+      const blob = [
+        r.title, r.abstract, r.id,
+        ...(r.authors || []),
+        ...(r.keywords || []),
+        ...(r.tags || []),
+        r.journal || '',
+      ].join(' ').toLowerCase();
+      if (!blob.includes(kw)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortKey === 'date-asc')   return a.date.localeCompare(b.date);
+    if (sortKey === 'date-desc')  return b.date.localeCompare(a.date);
+    if (sortKey === 'id-asc')     return a.id.localeCompare(b.id);
+    if (sortKey === 'title-asc')  return a.title.localeCompare(b.title);
+    return 0;
+  });
+
+  renderResults(kw);
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function renderStats() {
+  const counts = {};
+  allRecords.forEach(r => counts[r.type] = (counts[r.type] || 0) + 1);
+  document.getElementById('stats').textContent =
+    `${allRecords.length} records — ` +
+    Object.entries(counts).map(([t, n]) => `${n} ${TYPE_LABELS[t] || t}`).join(' · ');
+}
+
+function renderResults(kw) {
+  const grid   = document.getElementById('results-grid');
+  const noRes  = document.getElementById('no-results');
+  const meta   = document.getElementById('results-meta');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    noRes.classList.remove('hidden');
+    meta.textContent = '';
+    return;
+  }
+  noRes.classList.add('hidden');
+  meta.textContent = `Showing ${filtered.length} of ${allRecords.length} records`;
+
+  grid.innerHTML = filtered.map(r => cardHTML(r, kw)).join('');
+
+  grid.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => openModal(card.dataset.id));
+  });
+  grid.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', e => {
+      e.stopPropagation();
+      document.getElementById('keyword-input').value = tag.dataset.value;
+      applyFilters();
+    });
+  });
+}
+
+function cardHTML(r, kw) {
+  const hi = s => kw ? highlight(s, kw) : s;
+  return `
+    <div class="card" data-id="${r.id}">
+      <div class="card-header">
+        <span class="card-id">${r.id}</span>
+        <span class="type-badge type-${r.type}">${FILE_ICONS[r.type]} ${TYPE_LABELS[r.type]}</span>
+      </div>
+      <div class="card-title">${hi(r.title)}</div>
+      <div class="card-meta">
+        <span>📅 ${fmtDate(r.date)}</span>
+        <span>🗂️ ${r.fileType}</span>
+        ${r.authors ? `<span>👤 ${hi(r.authors[0])}${r.authors.length > 1 ? ' +' + (r.authors.length - 1) : ''}</span>` : ''}
+      </div>
+      <div class="card-abstract">${hi(r.abstract)}</div>
+      <div class="card-tags">
+        ${(r.tags || []).slice(0, 5).map(t =>
+          `<span class="tag${kw && t.toLowerCase().includes(kw) ? ' highlight' : ''}"
+                 data-value="${t}">${t}</span>`
+        ).join('')}
+      </div>
+    </div>`;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  const r = allRecords.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-badges">
+      <span class="card-id">${r.id}</span>
+      <span class="type-badge type-${r.type}">${FILE_ICONS[r.type]} ${TYPE_LABELS[r.type]}</span>
+      <span class="type-badge" style="background:var(--gray-100);color:var(--gray-600)">🗂️ ${r.fileType}</span>
+    </div>
+    <h2>${r.title}</h2>
+    <div class="modal-grid">
+      <div class="modal-field">
+        <label>Date</label>
+        <p>${fmtDate(r.date)}</p>
+      </div>
+      <div class="modal-field">
+        <label>Authors</label>
+        <p>${(r.authors || []).join(', ')}</p>
+      </div>
+      ${r.journal ? `<div class="modal-field" style="grid-column:span 2">
+        <label>Journal / Source</label>
+        <p>${r.journal}</p>
+      </div>` : ''}
+    </div>
+    <hr class="modal-divider" />
+    <p class="modal-abstract">${r.abstract}</p>
+    <div class="modal-keywords">
+      ${(r.keywords || []).map(k =>
+        `<span class="modal-keyword" onclick="setKeyword('${k}')">${k}</span>`
+      ).join('')}
+    </div>
+    ${r.doi ? `<p class="modal-doi">DOI: <a href="https://doi.org/${r.doi}" target="_blank" rel="noopener">${r.doi}</a></p>` : ''}
+  `;
+
+  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function setKeyword(kw) {
+  document.getElementById('keyword-input').value = kw;
+  closeModal();
+  applyFilters();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function clearAll() {
+  document.getElementById('keyword-input').value = '';
+  document.getElementById('id-input').value = '';
+  document.getElementById('date-from').value = '';
+  document.getElementById('date-to').value = '';
+  document.getElementById('type-filter').value = '';
+  document.getElementById('sort-by').value = 'date-desc';
+  applyFilters();
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return new Date(+y, +m - 1, +d).toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+}
+
+function highlight(text, kw) {
+  if (!kw || !text) return text;
+  const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
