@@ -22,7 +22,43 @@
       </div>
       <div class="header-meta">
         <div class="stats-chip" id="stats">Loading&hellip;</div>
-        <div class="header-date" id="header-date"></div>
+        <div class="profile-wrap">
+          <button class="profile-btn" id="profile-btn" title="View profile" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0 2c-3.33 0-10 1.67-10 5v1.5h20V19c0-3.33-6.67-5-10-5z"/>
+            </svg>
+          </button>
+
+          <div class="profile-panel hidden" id="profile-panel" role="dialog" aria-label="User profile">
+            <div class="profile-panel-header">
+              <div class="profile-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0 2c-3.33 0-10 1.67-10 5v1.5h20V19c0-3.33-6.67-5-10-5z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="profile-name">Pablo Calvo</div>
+                <div class="profile-role">Data Engineer</div>
+              </div>
+            </div>
+
+            <div class="profile-section-label">Privileges</div>
+            <div class="profile-privileges">
+              <span class="priv priv-search">Search</span>
+              <span class="priv priv-add">Add</span>
+              <span class="priv priv-edit">Edit</span>
+<span class="priv priv-delete">Delete</span>
+            </div>
+
+            <div class="profile-section-label">Details</div>
+            <div class="profile-details">
+              <div class="profile-row"><span>Department</span><span>Research &amp; Data</span></div>
+              <div class="profile-row"><span>Organisation</span><span>Allergy Research Unit</span></div>
+              <div class="profile-row"><span>Last login</span><span>Today, 09:14</span></div>
+              <div class="profile-row"><span>Account status</span><span class="status-active">Active</span></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>

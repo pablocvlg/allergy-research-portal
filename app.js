@@ -8,13 +8,19 @@ const TYPE_LABELS = {
   raw_data: 'Raw Data',
 };
 
+const TYPE_PLURAL = {
+  paper:    'Papers',
+  report:   'Reports',
+  slides:   'Slides',
+  raw_data: 'Raw Data',
+};
+
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 fetch('data/research.json')
   .then(r => r.json())
   .then(data => {
     allRecords = data;
     renderStats();
-    setHeaderDate();
     applyFilters();
     bindEvents();
   })
@@ -33,7 +39,20 @@ function bindEvents() {
   document.getElementById('type-filter').addEventListener('change', applyFilters);
   document.getElementById('sort-by').addEventListener('change', applyFilters);
   document.getElementById('clear-btn').addEventListener('click', clearAll);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeProfile(); } });
+
+  const profileBtn   = document.getElementById('profile-btn');
+  const profilePanel = document.getElementById('profile-panel');
+  profileBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = !profilePanel.classList.contains('hidden');
+    if (open) { closeProfile(); } else { openProfile(); }
+  });
+  document.addEventListener('click', e => {
+    if (!profilePanel.classList.contains('hidden') && !profilePanel.contains(e.target)) {
+      closeProfile();
+    }
+  });
 }
 
 // ── Filter & Sort ─────────────────────────────────────────────────────────────
@@ -78,13 +97,8 @@ function applyFilters() {
 function renderStats() {
   const counts = {};
   allRecords.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
-  const parts = Object.entries(counts).map(([t, n]) => `${n} ${TYPE_LABELS[t] || t}s`).join(' &middot; ');
+  const parts = Object.entries(counts).map(([t, n]) => `${n} ${TYPE_PLURAL[t] || t}`).join(' &middot; ');
   document.getElementById('stats').innerHTML = `${allRecords.length} records &mdash; ${parts}`;
-}
-
-function setHeaderDate() {
-  document.getElementById('header-date').textContent =
-    new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 function renderResults(kw) {
@@ -188,6 +202,16 @@ function openModal(id) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.add('hidden');
   document.body.style.overflow = '';
+}
+
+function openProfile() {
+  document.getElementById('profile-panel').classList.remove('hidden');
+  document.getElementById('profile-btn').setAttribute('aria-expanded', 'true');
+}
+
+function closeProfile() {
+  document.getElementById('profile-panel').classList.add('hidden');
+  document.getElementById('profile-btn').setAttribute('aria-expanded', 'false');
 }
 
 function setKeyword(kw) {
