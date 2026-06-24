@@ -9,6 +9,30 @@
 </head>
 <body>
 
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-box">
+      <div class="login-brand">
+        <img src="icon.png" class="login-logo" alt="Allergy Research Portal" />
+        <h2>Allergy Research Portal</h2>
+        <p>Internal &mdash; Confidential</p>
+      </div>
+      <div class="login-field">
+        <label for="login-id">User ID</label>
+        <input type="text" id="login-id" placeholder="Enter your user ID" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="login-field">
+        <label for="login-role">Role</label>
+        <select id="login-role">
+          <option value="Researcher">Researcher</option>
+          <option value="Data Engineer">Data Engineer</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+      <button id="login-btn" class="login-submit-btn">Sign In</button>
+      <div id="login-error" class="login-error hidden">Please enter a User ID.</div>
+    </div>
+  </div>
+
   <div class="topbar"></div>
 
   <header>
@@ -37,18 +61,13 @@
                 </svg>
               </div>
               <div>
-                <div class="profile-name">Pablo Calvo</div>
-                <div class="profile-role">Data Engineer</div>
+                <div class="profile-name" id="profile-name">&mdash;</div>
+                <div class="profile-role" id="profile-role">&mdash;</div>
               </div>
             </div>
 
             <div class="profile-section-label">Privileges</div>
-            <div class="profile-privileges">
-              <span class="priv priv-search">Search</span>
-              <span class="priv priv-add">Add</span>
-              <span class="priv priv-edit">Edit</span>
-<span class="priv priv-delete">Delete</span>
-            </div>
+            <div class="profile-privileges" id="profile-privileges"></div>
 
             <div class="profile-section-label">Details</div>
             <div class="profile-details">
@@ -56,6 +75,9 @@
               <div class="profile-row"><span>Organisation</span><span>Allergy Research Unit</span></div>
               <div class="profile-row"><span>Last login</span><span>Today, 09:14</span></div>
               <div class="profile-row"><span>Account status</span><span class="status-active">Active</span></div>
+            </div>
+            <div class="profile-logout-wrap">
+              <button class="profile-logout-btn" id="logout-btn">Log out</button>
             </div>
           </div>
         </div>
@@ -101,6 +123,14 @@
         <div class="filter-group">
           <label for="date-to">Date To</label>
           <input type="date" id="date-to" />
+        </div>
+        <div class="filter-group">
+          <label for="alk-filter">ALK</label>
+          <select id="alk-filter">
+            <option value="">All</option>
+            <option value="true">ALK</option>
+            <option value="false">General</option>
+          </select>
         </div>
         <div class="filter-group">
           <label for="sort-by">Sort By</label>

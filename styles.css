@@ -588,3 +588,215 @@ footer span { color: var(--g600); font-weight: 600; }
   .filter-bar { flex-direction: column; }
   .filter-group input, .filter-group select { min-width: 100%; }
 }
+
+/* ── LOGIN ───────────────────────────────────────── */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--g900);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-box {
+  background: #fff;
+  border-top: 4px solid var(--g600);
+  width: 100%;
+  max-width: 380px;
+  padding: 36px 32px 28px;
+  box-shadow: 0 12px 48px rgba(0,0,0,.35);
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-logo {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  object-fit: contain;
+}
+
+.login-brand h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.login-brand p {
+  font-size: .72rem;
+  color: var(--gray-400);
+}
+
+.login-field {
+  margin-bottom: 14px;
+}
+
+.login-field label {
+  display: block;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--gray-500);
+  margin-bottom: 5px;
+}
+
+.login-field input,
+.login-field select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  font-size: .88rem;
+  font-family: inherit;
+  color: var(--gray-900);
+  background: #fff;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.login-field input:focus,
+.login-field select:focus {
+  border-color: var(--g600);
+  box-shadow: 0 0 0 2px rgba(22,163,74,.12);
+}
+
+.login-field input::placeholder { color: var(--gray-400); }
+
+.login-submit-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--g700);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: .88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background .15s;
+  letter-spacing: .02em;
+}
+
+.login-submit-btn:hover { background: var(--g900); }
+
+.login-error {
+  margin-top: 10px;
+  font-size: .76rem;
+  color: #dc2626;
+  text-align: center;
+}
+
+/* ── ALK / GENERAL BADGE ─────────────────────────── */
+.alk-badge {
+  font-size: .66rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.general-badge {
+  font-size: .66rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  background: var(--gray-100);
+  color: var(--gray-400);
+  border: 1px solid var(--gray-200);
+}
+
+/* ── MODAL ACTIONS ───────────────────────────────── */
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
+  margin-top: 16px;
+}
+
+.modal-action-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  font-size: .82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s, color .12s;
+  letter-spacing: .01em;
+}
+
+.modal-btn-download {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border-color: var(--gray-300);
+}
+.modal-btn-download:hover { background: var(--gray-200); }
+
+.modal-btn-edit {
+  background: #fef9c3;
+  color: #854d0e;
+  border-color: #fde68a;
+}
+.modal-btn-edit:hover { background: #fef08a; }
+
+.modal-btn-request {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #bfdbfe;
+  font-size: .76rem;
+}
+.modal-btn-request:hover { background: #bfdbfe; }
+
+.modal-btn-delete {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+.modal-btn-delete:hover:not(:disabled) { background: #fecaca; }
+.modal-btn-delete:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* ── LOGOUT ──────────────────────────────────────── */
+.profile-logout-wrap {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.profile-logout-btn {
+  width: 100%;
+  padding: 7px;
+  background: #fff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  font-size: .78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+  letter-spacing: .02em;
+}
+
+.profile-logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}

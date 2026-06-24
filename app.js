@@ -1,5 +1,6 @@
 let allRecords = [];
 let filtered   = [];
+let currentUser = null;
 
 const TYPE_LABELS = {
   paper:    'Paper',
@@ -14,6 +15,54 @@ const TYPE_PLURAL = {
   slides:   'Slides',
   raw_data: 'Raw Data',
 };
+
+const ROLES = {
+  Admin:           { search: true, add: true,  edit: true,  delete: true  },
+  'Data Engineer': { search: true, add: true,  edit: false, delete: false },
+  Researcher:      { search: true, add: false, edit: false, delete: false },
+};
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function handleLogin() {
+  const id   = document.getElementById('login-id').value.trim();
+  const role = document.getElementById('login-role').value;
+  const err  = document.getElementById('login-error');
+
+  if (!id) {
+    err.classList.remove('hidden');
+    document.getElementById('login-id').focus();
+    return;
+  }
+  err.classList.add('hidden');
+
+  currentUser = { id, role };
+  sessionStorage.setItem('arp_user', JSON.stringify(currentUser));
+  document.getElementById('login-overlay').classList.add('hidden');
+  applyUserUI();
+}
+
+function handleLogout() {
+  sessionStorage.removeItem('arp_user');
+  currentUser = null;
+  closeProfile();
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-role').value = 'Researcher';
+  document.getElementById('login-error').classList.add('hidden');
+  document.getElementById('login-overlay').classList.remove('hidden');
+}
+
+function applyUserUI() {
+  const perms = ROLES[currentUser.role] || ROLES.Researcher;
+  document.getElementById('profile-name').textContent = currentUser.id;
+  document.getElementById('profile-role').textContent = currentUser.role;
+
+  document.getElementById('profile-privileges').innerHTML = [
+    perms.search && '<span class="priv priv-search">Search</span>',
+    perms.add    && '<span class="priv priv-add">Add</span>',
+    perms.edit   && '<span class="priv priv-edit">Edit</span>',
+    perms.delete && '<span class="priv priv-delete">Delete</span>',
+  ].filter(Boolean).join('');
+}
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 fetch('data/research.json')
@@ -30,6 +79,22 @@ fetch('data/research.json')
       'Serve via a local server: <code>npx serve .</code></p>';
   });
 
+// Bind login events and restore session immediately (data loads in parallel)
+(function initAuth() {
+  document.getElementById('login-btn').addEventListener('click', handleLogin);
+  document.getElementById('login-id').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+  const saved = sessionStorage.getItem('arp_user');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    document.getElementById('login-overlay').classList.add('hidden');
+    applyUserUI();
+  }
+})();
+
 // ── Events ───────────────────────────────────────────────────────────────────
 function bindEvents() {
   document.getElementById('keyword-input').addEventListener('input', debounce(applyFilters, 200));
@@ -37,6 +102,7 @@ function bindEvents() {
   document.getElementById('date-from').addEventListener('change', applyFilters);
   document.getElementById('date-to').addEventListener('change', applyFilters);
   document.getElementById('type-filter').addEventListener('change', applyFilters);
+  document.getElementById('alk-filter').addEventListener('change', applyFilters);
   document.getElementById('sort-by').addEventListener('change', applyFilters);
   document.getElementById('clear-btn').addEventListener('click', clearAll);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeProfile(); } });
@@ -62,6 +128,7 @@ function applyFilters() {
   const dateFrom = document.getElementById('date-from').value;
   const dateTo   = document.getElementById('date-to').value;
   const typeQ    = document.getElementById('type-filter').value;
+  const alkQ     = document.getElementById('alk-filter').value;
   const sortKey  = document.getElementById('sort-by').value;
 
   filtered = allRecords.filter(r => {
@@ -69,6 +136,7 @@ function applyFilters() {
     if (typeQ && r.type !== typeQ)   return false;
     if (dateFrom && r.date < dateFrom) return false;
     if (dateTo   && r.date > dateTo)   return false;
+    if (alkQ !== '' && String(r.alk) !== alkQ) return false;
     if (kw) {
       const blob = [
         r.title, r.abstract, r.id,
@@ -139,6 +207,7 @@ function cardHTML(r, kw) {
         <span class="card-id">${r.id}</span>
         <span class="type-badge type-${r.type}">${TYPE_LABELS[r.type]}</span>
         <span class="file-badge">${r.fileType}</span>
+        ${r.alk ? '<span class="alk-badge">ALK</span>' : ''}
       </div>
       <div class="card-title">${hi(r.title)}</div>
       <div class="card-meta">
@@ -161,11 +230,24 @@ function openModal(id) {
   const r = allRecords.find(x => x.id === id);
   if (!r) return;
 
+  const perms = currentUser ? (ROLES[currentUser.role] || ROLES.Researcher) : ROLES.Researcher;
+
+  const editBtn = perms.edit
+    ? `<button class="modal-action-btn modal-btn-edit">Edit</button>`
+    : `<button class="modal-action-btn modal-btn-request">Request Access to Edit</button>`;
+
+  const deleteBtn = perms.delete
+    ? `<button class="modal-action-btn modal-btn-delete">Delete</button>`
+    : `<button class="modal-action-btn modal-btn-delete" disabled>Delete</button>`;
+
   document.getElementById('modal-body').innerHTML = `
     <div class="modal-header-badges">
       <span class="card-id">${r.id}</span>
       <span class="type-badge type-${r.type}">${TYPE_LABELS[r.type]}</span>
       <span class="type-badge" style="background:var(--gray-100);color:var(--gray-500)">${r.fileType}</span>
+      ${r.alk
+        ? '<span class="alk-badge">ALK</span>'
+        : '<span class="general-badge">General</span>'}
     </div>
     <h2>${r.title}</h2>
     <div class="modal-meta-grid">
@@ -193,6 +275,11 @@ function openModal(id) {
       ).join('')}
     </div>
     ${r.doi ? `<p class="modal-doi">DOI: <a href="https://doi.org/${r.doi}" target="_blank" rel="noopener noreferrer">${r.doi}</a></p>` : ''}
+    <div class="modal-actions">
+      <button class="modal-action-btn modal-btn-download">Download</button>
+      ${editBtn}
+      ${deleteBtn}
+    </div>
   `;
 
   document.getElementById('modal-overlay').classList.remove('hidden');
@@ -226,6 +313,7 @@ function clearAll() {
     document.getElementById(id).value = '';
   });
   document.getElementById('type-filter').value = '';
+  document.getElementById('alk-filter').value = '';
   document.getElementById('sort-by').value = 'date-desc';
   applyFilters();
 }
