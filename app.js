@@ -24,13 +24,14 @@ const ROLES = {
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 function handleLogin() {
-  const id   = document.getElementById('login-id').value.trim();
-  const role = document.getElementById('login-role').value;
-  const err  = document.getElementById('login-error');
+  const id       = document.getElementById('login-id').value.trim();
+  const password = document.getElementById('login-password').value;
+  const role     = document.getElementById('login-role').value;
+  const err      = document.getElementById('login-error');
 
-  if (!id) {
+  if (!id || !password) {
     err.classList.remove('hidden');
-    document.getElementById('login-id').focus();
+    document.getElementById(!id ? 'login-id' : 'login-password').focus();
     return;
   }
   err.classList.add('hidden');
@@ -46,6 +47,7 @@ function handleLogout() {
   currentUser = null;
   closeProfile();
   document.getElementById('login-id').value = '';
+  document.getElementById('login-password').value = '';
   document.getElementById('login-role').value = 'Researcher';
   document.getElementById('login-error').classList.add('hidden');
   document.getElementById('login-overlay').classList.remove('hidden');
@@ -83,6 +85,9 @@ fetch('data/research.json')
 (function initAuth() {
   document.getElementById('login-btn').addEventListener('click', handleLogin);
   document.getElementById('login-id').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('login-password').addEventListener('keydown', e => {
     if (e.key === 'Enter') handleLogin();
   });
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
